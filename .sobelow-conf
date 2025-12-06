@@ -1,0 +1,12 @@
+[
+  verbose: true,
+  private: false,
+  skip: true,
+  exit: "Low",
+  format: "txt",
+  out: nil,
+  threshold: :high,
+  ignore: [],
+  ignore_files: [],
+  version: true
+]
