@@ -24,14 +24,10 @@ defmodule SecondLife.Tasks.DuplicateArchivesToNas do
     end
 
     duplicate = fn filename ->
-      block_size = 1024 * 1024
       Logger.info("Copying #{filename} to NAS at #{nas_path}")
       in_file = Path.join(archive_path, filename)
-      io_in = File.open!(in_file)
-      raw_in = IO.binstream(io_in, block_size)
-
       out_file = Path.join(nas_path, filename)
-      raw_in |> Stream.into(File.stream!(out_file)) |> Stream.run()
+      File.copy!(in_file, out_file)
     end
 
     # Create NAS dir if not present
