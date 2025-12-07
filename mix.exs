@@ -23,7 +23,7 @@ defmodule SecondLife.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       releases: releases(),
       start_permanent: Mix.env() == :prod,
-      version: "0.2.0"
+      version: "0.2.1"
     ]
   end
 
@@ -49,7 +49,8 @@ defmodule SecondLife.MixProject do
       {:git_hooks, "0.8.1", only: [:dev, :test], runtime: false},
       {:mix_audit, "2.1.5", only: [:dev, :test], runtime: false},
       {:sobelow, "0.14.0", only: [:dev, :test], runtime: false},
-      {:styler, "1.9.1", only: [:dev, :test], runtime: false}
+      {:styler, "1.9.1", only: [:dev, :test], runtime: false},
+      {:benchee, "1.3.1", only: :dev, runtime: false}
 
       # Runtime libraries
     ]

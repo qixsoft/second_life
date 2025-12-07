@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(gh issue view:*)",
+      "Bash(mix deps.get:*)",
+      "Bash(mix run:*)",
+      "Bash(mix test:*)",
+      "Bash(mix format:*)",
+      "Bash(mix credo:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
