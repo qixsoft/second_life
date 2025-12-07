@@ -12,8 +12,7 @@ defmodule SecondLife.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: SecondLife.Worker.start_link(arg)
-      # {SecondLife.Worker, arg}
+      {Task.Supervisor, name: SecondLife.TaskSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

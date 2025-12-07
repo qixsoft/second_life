@@ -1,3 +1,5 @@
+alias Credo.Check.Refactor.MapInto
+
 # This file contains the configuration for Credo and you are probably reading
 # this after creating it with `mix credo.gen.config`.
 #
@@ -77,8 +79,7 @@
           # You can customize the priority of any check
           # Priority values are: `low, normal, high, higher`
           #
-          {Credo.Check.Design.AliasUsage,
-           [priority: :low, if_nested_deeper_than: 2, if_called_more_often_than: 0]},
+          {Credo.Check.Design.AliasUsage, [priority: :low, if_nested_deeper_than: 2, if_called_more_often_than: 0]},
           {Credo.Check.Design.TagFIXME, []},
           # You can also customize the exit of each check.
           # If you don't want TODO comments to cause `mix credo` to fail, just
@@ -121,7 +122,7 @@
           {Credo.Check.Refactor.FilterFilter, []},
           {Credo.Check.Refactor.FunctionArity, []},
           {Credo.Check.Refactor.LongQuoteBlocks, []},
-          {Credo.Check.Refactor.MapInto, []},
+          {MapInto, []},
           {Credo.Check.Refactor.MapJoin, []},
           {Credo.Check.Refactor.MatchInCondition, []},
           {Credo.Check.Refactor.NegatedConditionsInUnless, []},
@@ -188,7 +189,7 @@
           {Credo.Check.Refactor.FilterReject, []},
           {Credo.Check.Refactor.IoPuts, []},
           # requires Elixir < 1.8.0
-          {Credo.Check.Refactor.MapInto, []},
+          {MapInto, []},
           {Credo.Check.Refactor.MapMap, []},
           {Credo.Check.Refactor.ModuleDependencies, []},
           {Credo.Check.Refactor.NegatedIsNil, []},

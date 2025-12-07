@@ -22,4 +22,4 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 second_life-*.tar
 
-/priv/plts/
+/priv/
