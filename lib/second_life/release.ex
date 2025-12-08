@@ -21,7 +21,13 @@ defmodule SecondLife.Release do
     Application.ensure_all_started(:second_life)
     today = Date.utc_today()
     machine_name = :inet.gethostname() |> elem(1) |> to_string()
-    {parsed, _, _} = OptionParser.parse(args, strict: [source_dir: :string, target_dir: :string, timeout: :integer])
+
+    {parsed, _, _} =
+      OptionParser.parse(args,
+        strict: [keep_files: :boolean, source_dir: :string, target_dir: :string, timeout: :integer]
+      )
+
+    keep_files? = parsed[:keep_files] || false
     nas_path = parsed[:nas_path] || "/Volumes/The Crag/Second Life/#{machine_name}/#{today}"
     source_dir = parsed[:source_dir] || "~/Downloads"
     target_dir = parsed[:target_dir] || "/Volumes/Second Life/#{today}"
@@ -31,7 +37,8 @@ defmodule SecondLife.Release do
     archive_task =
       Task.Supervisor.async(SecondLife.TaskSupervisor, ArchiveAndMove, :execute, [
         source_dir,
-        target_dir
+        target_dir,
+        keep_files?
       ])
 
     case Task.await(archive_task, timeout) do
