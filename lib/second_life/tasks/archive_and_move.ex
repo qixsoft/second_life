@@ -20,7 +20,8 @@ defmodule SecondLife.Tasks.ArchiveAndMove do
     source_path = Path.expand(source_dir)
     target_path = Path.expand(target_dir)
 
-    with {:ok, filenames} <- SecondLife.fetch_source_filenames(source_dir),
+    with :ok <- File.mkdir_p!(target_path),
+         {:ok, filenames} <- SecondLife.fetch_source_filenames(source_dir),
          {:ok, archive} <- SecondLife.archive(filenames, source_path),
          :ok <- Logger.info("Archive is #{archive}"),
          target_archive = Path.join(target_path, Path.basename(archive)),
