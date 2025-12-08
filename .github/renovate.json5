@@ -1,0 +1,106 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'github>insurgent-lab/.github//renovate/base',
+    'customManagers:dockerfileVersions',
+    ':pinVersions',
+    'schedule:nonOfficeHours'
+  ],
+  "baseBranchPatterns": ["preview"],
+  packageRules: [
+    {
+      matchManagers: [
+        'mix',
+      ],
+      enabled: true,
+    },
+    {
+      matchManagers: [
+        'custom.regex',
+        'asdf',
+      ],
+      semanticCommitType: 'build',
+      semanticCommitScope: 'runtime',
+      schedule: 'at any time',
+      matchPackageNames: [
+        '/debian/',
+        '/erlang/',
+        '/elixir/',
+      ],
+    },
+    {
+      matchDatasources: [
+        'docker',
+      ],
+      matchPackageNames: [
+        'debian',
+      ],
+      versioning: 'regex:^(?<compatibility>.*)-(?<minor>\\d+)-slim$',
+    },
+    {
+      matchDatasources: [
+        'docker',
+      ],
+      matchPackageNames: [
+        'debian',
+      ],
+      matchUpdateTypes: [
+        'pinDigest',
+      ],
+      enabled: false,
+    },
+    {
+      matchManagers: [
+        'mix',
+      ],
+      semanticCommitType: 'build',
+      semanticCommitScope: 'deps',
+      matchPackageNames: [
+        '*',
+      ],
+      schedule: [
+            '* 0-4,22-23 * * 1-5',
+            '* * * * 0,6'
+      ],
+    },
+    {
+      matchManagers: [
+        'docker-compose',
+      ],
+      matchPackageNames: [
+        'postgres',
+      ],
+      semanticCommitType: 'chore',
+      semanticCommitScope: 'docker',
+    },
+    {
+      matchManagers: [
+        'dockerfile',
+      ],
+      labels: [
+        'docker',
+      ],
+    },
+    {
+      matchManagers: [
+        'github-actions',
+      ],
+      labels: [
+        'ci-cd',
+      ],
+    },
+    {
+      matchDepNames: [
+        'flyctl',
+      ],
+      matchFileNames: [
+        '.github/workflows/*.yml',
+      ],
+      semanticCommitType: 'ci',
+      semanticCommitScope: 'action',
+    },
+  ],
+  addLabels: [
+    'hygiene',
+  ]
+}
