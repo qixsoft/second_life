@@ -6,7 +6,6 @@
     ':pinVersions',
     'schedule:nonOfficeHours'
   ],
-  "baseBranchPatterns": ["preview"],
   packageRules: [
     {
       matchManagers: [
