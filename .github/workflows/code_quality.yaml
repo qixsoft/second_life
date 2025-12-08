@@ -1,0 +1,109 @@
+name: Code Quality
+on:
+  push:
+    branches: ["dev/**"]
+    paths-ignore:
+      - "docs/**"
+  pull_request:
+    branches: ["dev/**", main]
+    paths-ignore:
+      - "docs/**"
+
+env:
+  MIX_ENV: test
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+  packages: none
+
+jobs:
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup elixir
+        id: beam
+        uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
+        with:
+          version-file: .tool-versions
+          version-type: strict
+          install-rebar: true
+          install-hex: true
+
+      - name: Get app version
+        id: set-version
+        run: |
+          VERSION=$(grep 'version:' mix.exs | sed -n 's/.*version: "\([^"]*\)".*/\1/p' | head -n 1)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
+      - name: Get version
+        run: echo "The app version is ${{ steps.set-version.outputs.VERSION }}"
+
+      - name: Retrieve Build Cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: build-folder-cache
+        with:
+          path: _build/test
+          key: ${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.set-version.outputs.VERSION }}-build-test-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+
+      - name: Retrieve Mix Dependencies Cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: mix-cache
+        with:
+          path: deps
+          key: ${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+
+      - name: Install Mix Dependencies
+        run: mix deps.get
+
+      - name: Check Formatting
+        run: mix format --check-formatted
+
+      - name: Check security vulnerabilities
+        run: |
+          mix sobelow -d --config -v
+          mix deps.audit --format human
+          mix hex.audit
+
+      - name: Compile
+        run: MIX_ENV=test mix compile --warnings-as-errors
+
+      - name: Run Credo
+        run: MIX_ENV=test mix credo --strict
+
+      - name: Retrieve PLT Cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: plt-cache
+        with:
+          key: |
+            ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-plt-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-plt-
+          path: |
+            priv/plts
+
+      # Create PLTs if no cache was found
+      - name: Create PLTs
+        if: steps.plt-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p priv/plts
+          MIX_ENV=test mix dialyzer --plt
+
+      - name: Save PLT cache
+        id: plt_cache_save
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        if: steps.plt-cache.outputs.cache-hit != 'true'
+        with:
+          key: |
+            ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-plt-${{ hashFiles('**/mix.lock') }}
+          path: |
+            priv/plts
+
+      - name: Run dialyzer
+        run: MIX_ENV=test mix dialyzer --format github
