@@ -50,7 +50,7 @@ defmodule SecondLife.MixProject do
       {:mix_audit, "2.1.5", only: [:dev, :test], runtime: false},
       {:sobelow, "0.14.0", only: [:dev, :test], runtime: false},
       {:styler, "1.9.1", only: [:dev, :test], runtime: false},
-      {:benchee, "1.3.1", only: :dev, runtime: false}
+      {:benchee, "== 1.5.0", only: :dev, runtime: false}
 
       # Runtime libraries
     ]
