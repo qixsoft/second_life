@@ -53,6 +53,22 @@ defmodule SecondLife.Tasks.ArchiveAndMoveTest do
       assert source_files == []
     end
 
+    test "does not clean up source files after archiving if requested", ctx do
+      %{source_dir: source_dir, target_dir: target_dir} = ctx
+
+      # Create test files in source
+      File.write!(Path.join(source_dir, "file1.txt"), "content 1")
+      File.write!(Path.join(source_dir, "file2.txt"), "content 2")
+
+      keep_files? = true
+
+      assert :ok = ArchiveAndMove.execute(source_dir, target_dir, keep_files?)
+
+      # Verify source files are not removed
+      {:ok, source_files} = File.ls(source_dir)
+      assert source_files == ["file2.txt", "file1.txt"]
+    end
+
     test "cleans up source subdirectories after archiving", ctx do
       %{source_dir: source_dir, target_dir: target_dir} = ctx
 

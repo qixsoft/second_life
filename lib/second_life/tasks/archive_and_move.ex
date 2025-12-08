@@ -13,8 +13,10 @@ defmodule SecondLife.Tasks.ArchiveAndMove do
   Main function to execute the SecondLife archiving and subsequent moving of that archive
   to a terget location.
   """
-  @spec execute(source_dir :: String.t(), target_dir :: String.t()) :: :ok | {:error, :archive_exists}
-  def execute(source_dir, target_dir) when is_binary(source_dir) and is_binary(target_dir) do
+  @spec execute(source_dir :: String.t(), target_dir :: String.t(), keep_files? :: boolean()) ::
+          :ok | {:error, :archive_exists}
+  def execute(source_dir, target_dir, keep_files? \\ false)
+      when is_boolean(keep_files?) and is_binary(source_dir) and is_binary(target_dir) do
     source_path = Path.expand(source_dir)
     target_path = Path.expand(target_dir)
 
@@ -28,19 +30,21 @@ defmodule SecondLife.Tasks.ArchiveAndMove do
         :ok = File.rm(archive)
         Logger.info("Moved archive file to #{target_archive}")
 
-        {dirs, files} = filenames |> Enum.map(&Path.join(source_path, &1)) |> Enum.split_with(&File.dir?(&1))
+        if keep_files? == false do
+          {dirs, files} = filenames |> Enum.map(&Path.join(source_path, &1)) |> Enum.split_with(&File.dir?(&1))
 
-        for dir <- dirs do
-          :ok = File.touch!(dir)
-          File.rm_rf!(dir)
+          for dir <- dirs do
+            :ok = File.touch!(dir)
+            File.rm_rf!(dir)
+          end
+
+          for file <- files do
+            :ok = File.touch!(file)
+            File.rm!(file)
+          end
+
+          Logger.info("Deleted source files from #{source_path}")
         end
-
-        for file <- files do
-          :ok = File.touch!(file)
-          File.rm!(file)
-        end
-
-        Logger.info("Deleted source files from #{source_path}")
 
         :ok
       else
