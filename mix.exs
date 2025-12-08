@@ -48,7 +48,7 @@ defmodule SecondLife.MixProject do
       {:dialyxir, "1.4.7", only: [:dev, :test], runtime: false},
       {:git_hooks, "0.8.1", only: [:dev, :test], runtime: false},
       {:mix_audit, "2.1.5", only: [:dev, :test], runtime: false},
-      {:sobelow, "0.14.0", only: [:dev, :test], runtime: false},
+      {:sobelow, "== 0.14.1", only: [:dev, :test], runtime: false},
       {:styler, "1.9.1", only: [:dev, :test], runtime: false},
       {:benchee, "== 1.5.0", only: :dev, runtime: false}
 
