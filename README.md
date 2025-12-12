@@ -10,7 +10,7 @@ by adding `second_life` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:second_life, "~> 0.1.0"}
+    {:second_life, "~> 0.3"}
   ]
 end
 ```
