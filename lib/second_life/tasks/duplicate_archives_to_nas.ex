@@ -30,12 +30,48 @@ defmodule SecondLife.Tasks.DuplicateArchivesToNas do
       File.copy!(in_file, out_file)
     end
 
-    # Create NAS dir if not present
-    :ok = File.mkdir_p!(nas_path)
-
-    with {:ok, files} <- File.ls(archive_path) do
+    with :ok <- File.mkdir_p(nas_path),
+         {:ok, files} <- File.ls(archive_path) do
       archives = Enum.filter(files, relevant_archives)
       Enum.each(archives, duplicate)
+    else
+      {:error, code} ->
+        Logger.warning("Unable to move to NAS path due to #{code} - rolling back")
+        # Rollback operations
+        rollback_archives(archive_path)
+    end
+  end
+
+  defp rollback_archives(archive_path) do
+    # 1. Move archives back to their source directory - decode path
+    # 2. Unzip each moved archive in original source directory
+    # 3. Delete archive from source directory
+    Logger.info("Rolling back from #{archive_path}")
+
+    with {:ok, archives} <- File.ls(archive_path) do
+      results = Enum.map(archives, &rollback(archive_path, &1))
+
+      if Enum.all?(results, &(elem(&1, 0) == :ok)) do
+        :ok
+      else
+        msg = "Unable to rollback"
+        Logger.error(msg)
+        {:error, msg}
+      end
+    end
+  end
+
+  defp rollback(archive_path, archive_name) do
+    archive = Path.join(archive_path, archive_name)
+    Logger.info("Rolling back archive #{archive}")
+    base_name = Path.basename(archive_name, ".zip")
+    origin_dir = Base.decode32!(base_name)
+    origin = Path.join([origin_dir, archive_name])
+
+    with {:ok, _bytes_copied} <- File.copy(archive, origin),
+         :ok <- SecondLife.recover(origin),
+         {:ok, [^archive]} <- File.rm_rf(archive_path) do
+      {:ok, origin}
     end
   end
 end

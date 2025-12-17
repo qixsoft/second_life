@@ -80,4 +80,20 @@ defmodule SecondLife do
       {:error, reason} -> raise reason
     end
   end
+
+  @doc """
+  Recover the files from an archive then delete the archive.
+  """
+  def recover(origin_path) do
+    cwd = String.to_charlist(Path.dirname(origin_path))
+
+    with {:ok, _file_list} <- :zip.unzip(String.to_charlist(origin_path), [{:cwd, cwd}]),
+         :ok <- File.rm!(origin_path) do
+      :ok
+    else
+      {:error, reason} = err ->
+        Logger.error("Unable to recover archive #{origin_path} due to #{inspect(reason)}")
+        err
+    end
+  end
 end

@@ -101,18 +101,17 @@ defmodule SecondLife.Release do
         keep_files?
       ])
 
-    case Task.await(archive_task, timeout) do
-      :ok ->
-        archive_path = Path.expand(target_dir)
+    archive_path = Path.expand(target_dir)
 
-        duplicate_task =
-          Task.Supervisor.async(SecondLife.TaskSupervisor, DuplicateArchivesToNas, :execute, [
-            archive_path,
-            nas_path
-          ])
-
-        :ok = Task.await(duplicate_task, timeout)
-
+    with :ok <- Task.await(archive_task, timeout),
+         duplicate_task =
+           Task.Supervisor.async(SecondLife.TaskSupervisor, DuplicateArchivesToNas, :execute, [
+             archive_path,
+             nas_path
+           ]),
+         :ok <- Task.await(duplicate_task, timeout) do
+      :ok
+    else
       {:error, :archive_exists} ->
         Logger.warning("Stopping due to the archive being already present in #{target_dir}")
         {:error, :archive_exists}
