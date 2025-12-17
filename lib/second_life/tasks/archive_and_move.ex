@@ -21,39 +21,42 @@ defmodule SecondLife.Tasks.ArchiveAndMove do
     target_path = Path.expand(target_dir)
 
     with :ok <- File.mkdir_p!(target_path),
-         {:ok, filenames} <- SecondLife.fetch_source_filenames(source_dir),
+         {:ok, [_ | _] = filenames} <- SecondLife.fetch_source_filenames(source_dir),
          {:ok, archive} <- SecondLife.archive(filenames, source_path),
          :ok <- Logger.info("Archive is #{archive}"),
          target_archive = Path.join(target_path, Path.basename(archive)),
-         :ok <- Logger.info("Target Archive is #{target_archive}") do
-      if File.exists?(target_archive) == false do
-        :ok = File.cp(archive, target_archive)
-        :ok = File.rm(archive)
+         :ok <- Logger.info("Target Archive is #{target_archive}"),
+         false <- File.exists?(target_archive),
+         :ok <- File.cp(archive, target_archive),
+         :ok <- File.rm(archive) do
+      wait_for_target(target_path, File.ls!(target_path))
+      Logger.info("Moved archive file to #{target_archive}")
 
-        wait_for_target(target_path, File.ls!(target_path))
-        Logger.info("Moved archive file to #{target_archive}")
+      if keep_files? == false do
+        {dirs, files} =
+          filenames |> Enum.map(&Path.join(source_path, &1)) |> Enum.split_with(&File.dir?(&1))
 
-        if keep_files? == false do
-          {dirs, files} =
-            filenames |> Enum.map(&Path.join(source_path, &1)) |> Enum.split_with(&File.dir?(&1))
-
-          for dir <- dirs do
-            :ok = File.touch!(dir)
-            File.rm_rf!(dir)
-          end
-
-          for file <- files do
-            :ok = File.touch!(file)
-            File.rm!(file)
-          end
-
-          Logger.info("Deleted source files from #{source_path}")
+        for dir <- dirs do
+          :ok = File.touch!(dir)
+          File.rm_rf!(dir)
         end
 
-        :ok
-      else
-        {:error, :archive_exists}
+        for file <- files do
+          :ok = File.touch!(file)
+          File.rm!(file)
+        end
+
+        Logger.info("Deleted source files from #{source_path}")
       end
+
+      :ok
+    else
+      {:ok, []} ->
+        Logger.info("The source directory is empty - skipping workflow")
+        :ok
+
+      true ->
+        {:error, :archive_exists}
     end
   end
 
