@@ -5,6 +5,8 @@
 defmodule SecondLife.Tasks.ArchiveAndMoveTest do
   use ExUnit.Case, async: true
 
+  import ExUnit.CaptureLog
+
   alias SecondLife.Tasks.ArchiveAndMove
 
   @moduletag :unit
@@ -25,6 +27,20 @@ defmodule SecondLife.Tasks.ArchiveAndMoveTest do
   end
 
   describe "execute/2" do
+    test "empty source directory skips the workflow", ctx do
+      %{source_dir: source_dir, target_dir: target_dir} = ctx
+      Logger.configure(level: :info)
+
+      {result, log} =
+        with_log(fn ->
+          ArchiveAndMove.execute(source_dir, target_dir)
+        end)
+
+      assert result == :ok
+      assert log =~ "skipping workflow"
+      Logger.configure(level: :warning)
+    end
+
     test "archives source directory and moves to target", ctx do
       %{source_dir: source_dir, target_dir: target_dir} = ctx
 
