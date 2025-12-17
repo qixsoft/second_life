@@ -6,6 +6,7 @@
     ':pinVersions',
     'schedule:nonOfficeHours'
   ],
+  commitBody: '[skip ci]',
   packageRules: [
     {
       matchManagers: [

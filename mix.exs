@@ -23,7 +23,7 @@ defmodule SecondLife.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       releases: releases(),
       start_permanent: Mix.env() == :prod,
-      version: "0.4.1"
+      version: "0.4.2"
     ]
   end
 

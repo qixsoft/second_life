@@ -85,6 +85,12 @@ defmodule SecondLifeTest do
     end
 
     test "archive!/2 raises on failure" do
+      # Clean up any zip file left in CWD by failed archive attempt
+      on_exit(fn ->
+        archive_name = "#{Base.encode32(Path.expand("/tmp"))}.zip"
+        File.rm(archive_name)
+      end)
+
       assert_raise RuntimeError, ~r/Failed to create archive/, fn ->
         SecondLife.archive!(["non_existent_file.txt"], "/tmp")
       end
