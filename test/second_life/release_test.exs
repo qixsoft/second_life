@@ -217,6 +217,27 @@ defmodule SecondLife.ReleaseTest do
       {:ok, source_files} = File.ls(source_dir)
       assert source_files == []
     end
+
+    test "can rollback to start if NAS directory has no access", ctx do
+      %{source_dir: source_dir, target_dir: target_dir} = ctx
+
+      # Create test files in source
+      File.write!(Path.join(source_dir, "file4.txt"), "content 4")
+      File.write!(Path.join(source_dir, "file44.txt"), "content 44")
+
+      config = %Release{
+        source_dir: source_dir,
+        target_dir: target_dir,
+        nas_path: "/does/not/exist",
+        keep_files?: false,
+        timeout: 60_000
+      }
+
+      assert :ok = Release.run_workflow(config)
+
+      refute File.exists?(target_dir)
+      assert MapSet.new(File.ls!(source_dir)) == MapSet.new(["file4.txt", "file44.txt"])
+    end
   end
 
   describe "struct defaults" do

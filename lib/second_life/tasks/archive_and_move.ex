@@ -29,10 +29,13 @@ defmodule SecondLife.Tasks.ArchiveAndMove do
       if File.exists?(target_archive) == false do
         :ok = File.cp(archive, target_archive)
         :ok = File.rm(archive)
+
+        wait_for_target(target_path, File.ls!(target_path))
         Logger.info("Moved archive file to #{target_archive}")
 
         if keep_files? == false do
-          {dirs, files} = filenames |> Enum.map(&Path.join(source_path, &1)) |> Enum.split_with(&File.dir?(&1))
+          {dirs, files} =
+            filenames |> Enum.map(&Path.join(source_path, &1)) |> Enum.split_with(&File.dir?(&1))
 
           for dir <- dirs do
             :ok = File.touch!(dir)
@@ -53,4 +56,11 @@ defmodule SecondLife.Tasks.ArchiveAndMove do
       end
     end
   end
+
+  defp wait_for_target(target, []) do
+    :timer.sleep(100)
+    wait_for_target(target, File.ls!(target))
+  end
+
+  defp wait_for_target(_target, _files), do: :done
 end
