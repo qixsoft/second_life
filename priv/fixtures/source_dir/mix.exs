@@ -44,7 +44,7 @@ defmodule SecondLife.MixProject do
   defp deps do
     [
       # Development and testing tools, libraries and apps
-      {:credo, "1.7.14", only: [:dev, :test], runtime: false},
+      {:credo, "== 1.7.15", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.4.7", only: [:dev, :test], runtime: false},
       {:git_hooks, "0.8.1", only: [:dev, :test], runtime: false},
       {:mix_audit, "2.1.5", only: [:dev, :test], runtime: false},
