@@ -42,14 +42,14 @@ jobs:
         run: echo "The app version is ${{ steps.set-version.outputs.VERSION }}"
 
       - name: Retrieve Build Cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         id: build-folder-cache
         with:
           path: _build/test
           key: ${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.set-version.outputs.VERSION }}-build-test-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
 
       - name: Retrieve Mix Dependencies Cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         id: mix-cache
         with:
           path: deps
@@ -74,7 +74,7 @@ jobs:
         run: MIX_ENV=test mix credo --strict
 
       - name: Retrieve PLT Cache
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         id: plt-cache
         with:
           key: |
@@ -93,7 +93,7 @@ jobs:
 
       - name: Save PLT cache
         id: plt_cache_save
-        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         if: steps.plt-cache.outputs.cache-hit != 'true'
         with:
           key: |
